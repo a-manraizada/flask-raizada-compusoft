@@ -25,8 +25,8 @@
       <div class="col-md-4">
         <div class="card text-white bg-primary mb-3">
           <div class="card-body">
-            <h5 class="card-title">Users</h5>
-            <p class="card-text">42 active users</p>
+            <h5 class="card-title">Employees</h5>
+            <p class="card-text">4 active employees</p>
           </div>
         </div>
       </div>
@@ -48,6 +48,15 @@
           </div>
         </div>
       </div>
+      <hr>
+        <h4>Upload Excel File</h4>
+        <form method="POST" action="/upload" enctype="multipart/form-data">
+        <div class="mb-3">
+            <input type="file" name="file" accept=".xlsx" class="form-control">
+        </div>
+        <button type="submit" class="btn btn-primary">Upload</button>
+        </form>
+
     </div>
   </div>
 </div>
