@@ -1,13 +1,15 @@
 from flask import Flask, render_template, request, redirect, url_for, session, flash
 from flask_sqlalchemy import SQLAlchemy
+import urllib.parse
 import pandas as pd
 import os
 
 # app = Flask(__name__)
 app = Flask(__name__, instance_path='/tmp/flask_instance')
 app.secret_key = 'super secret key'
-
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:Aman@2791@db.hpokpmcaqjjlaigoczmh.supabase.co:5432/postgres'
+db_password = 'Aman@2791'
+db_password = urllib.parse.quote_plus(db_password)
+app.config['SQLALCHEMY_DATABASE_URI'] = f'postgresql://postgres:{db_password}@db.hpokpmcaqjjlaigoczmh.supabase.co:5432/postgres'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['UPLOAD_FOLDER'] = 'uploads'
 db = SQLAlchemy(app)
