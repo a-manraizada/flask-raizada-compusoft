@@ -16,7 +16,7 @@ class UserData(db.Model):
     name = db.Column(db.String(100))
     email = db.Column(db.String(100))
     age = db.Column(db.Integer)
-    
+
 # Initialize DB
 with app.app_context():
     db.create_all()
@@ -50,32 +50,36 @@ def logout():
     session.pop('username', None)
     return redirect(url_for('home'))
 
+import traceback
+
 @app.route('/upload', methods=['POST'])
 def upload():
-    if 'file' not in request.files:
-        flash('No file part', 'danger')
-        return redirect(url_for('home'))
-    
-    file = request.files['file']
-    if file.filename == '':
-        flash('No selected file', 'warning')
-        return redirect(url_for('home'))
+    try:
+        if 'file' not in request.files:
+            flash('No file part', 'danger')
+            return redirect(url_for('home'))
 
-    if file and file.filename.endswith('.xlsx'):
-        filepath = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
-        file.save(filepath)
+        file = request.files['file']
+        if file.filename == '':
+            flash('No selected file', 'warning')
+            return redirect(url_for('home'))
 
-        # Read Excel and store in DB
-        try:
+        if file and file.filename.endswith('.xlsx'):
+            filepath = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
+            file.save(filepath)
+
             df = pd.read_excel(filepath)
             for _, row in df.iterrows():
                 user = UserData(name=row['Name'], email=row['Email'], age=int(row['Age']))
                 db.session.add(user)
             db.session.commit()
             flash('Data uploaded successfully!', 'success')
-        except Exception as e:
-            flash(f'Error processing file: {e}', 'danger')
-    else:
-        flash('Invalid file type. Please upload a .xlsx file.', 'danger')
 
-    return redirect(url_for('home'))
+        else:
+            flash('Invalid file type. Please upload a .xlsx file.', 'danger')
+        return redirect(url_for('home'))
+
+    except Exception as e:
+        print("ERROR:", traceback.format_exc())  # Vercel logs
+        flash(f'Server error: {e}', 'danger')
+        return redirect(url_for('home'))
