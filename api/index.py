@@ -7,7 +7,7 @@ import os
 app = Flask(__name__, instance_path='/tmp/flask_instance')
 app.secret_key = 'super secret key'
 
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////tmp/data.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:Aman@2791@db.hpokpmcaqjjlaigoczmh.supabase.co:5432/postgres'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['UPLOAD_FOLDER'] = 'uploads'
 db = SQLAlchemy(app)
