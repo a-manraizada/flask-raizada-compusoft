@@ -70,6 +70,7 @@ def upload():
             return redirect(url_for('home'))
 
         if file and file.filename.endswith('.xlsx'):
+            os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
             filepath = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
             file.save(filepath)
 
