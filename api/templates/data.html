@@ -1,0 +1,35 @@
+{% extends "layout.html" %}
+{% block title %}Uploaded Data{% endblock %}
+
+{% block content %}
+<h3>Uploaded Data</h3>
+
+{% if data %}
+  <div class="table-responsive">
+    <table class="table table-bordered table-striped table-hover">
+      <thead class="table-dark">
+        <tr>
+          <th>ID</th>
+          <th>Name</th>
+          <th>Email</th>
+          <th>Age</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in data %}
+        <tr>
+          <td>{{ row.id }}</td>
+          <td>{{ row.name }}</td>
+          <td>{{ row.email }}</td>
+          <td>{{ row.age }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% else %}
+  <p>No data found.</p>
+{% endif %}
+
+<a href="{{ url_for('home') }}" class="btn btn-secondary mt-3">Back to Dashboard</a>
+{% endblock %}

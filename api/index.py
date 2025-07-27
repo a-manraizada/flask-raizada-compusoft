@@ -86,3 +86,11 @@ def upload():
         print("ERROR:", traceback.format_exc())  # Vercel logs
         flash(f'Server error: {e}', 'danger')
         return redirect(url_for('home'))
+
+@app.route('/data')
+def view_data():
+    if 'username' not in session:
+        return redirect(url_for('login'))
+
+    all_data = UserData.query.all()
+    return render_template('data.html', data=all_data, username=session['username'])
