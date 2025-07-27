@@ -3,9 +3,12 @@ from flask_sqlalchemy import SQLAlchemy
 import pandas as pd
 import os
 
-app = Flask(__name__)
+# app = Flask(__name__)
+app = Flask(__name__, instance_path='/tmp/flask_instance')
 app.secret_key = 'super secret key'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///data.db'
+
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////tmp/data.db'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['UPLOAD_FOLDER'] = 'uploads'
 db = SQLAlchemy(app)
 
