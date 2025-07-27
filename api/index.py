@@ -9,7 +9,7 @@ app = Flask(__name__, instance_path='/tmp/flask_instance')
 app.secret_key = 'super secret key'
 db_password = 'Aman@2791'
 db_password = urllib.parse.quote_plus(db_password)
-app.config['SQLALCHEMY_DATABASE_URI'] = f'postgresql://postgres:{db_password}@db.hpokpmcaqjjlaigoczmh.supabase.co:5432/postgres'
+app.config['SQLALCHEMY_DATABASE_URI'] = f'postgresql://postgres.hpokpmcaqjjlaigoczmh:{db_password}@aws-0-ap-south-1.pooler.supabase.com:6543/postgres'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['UPLOAD_FOLDER'] = 'uploads'
 db = SQLAlchemy(app)
