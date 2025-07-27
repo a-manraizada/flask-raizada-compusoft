@@ -6,7 +6,7 @@ app.secret_key = 'super secret key'
 @app.route('/')
 def home():
     if 'username' in session:
-        return f'Hello, {session["username"]}!'
+        return render_template('dashboard.html', username=session['username'])
     return 'Hello, World! <a href="/login">Login</a>'
 
 @app.route('/about')
@@ -19,7 +19,6 @@ def login():
         username = request.form['username']
         password = request.form['password']
 
-        # Replace this with your real user validation
         if username == 'admin' and password == 'password':
             session['username'] = username
             return redirect(url_for('home'))
