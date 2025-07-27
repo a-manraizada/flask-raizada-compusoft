@@ -11,7 +11,7 @@ db_password = 'Aman@2791'
 db_password = urllib.parse.quote_plus(db_password)
 app.config['SQLALCHEMY_DATABASE_URI'] = f'postgresql://postgres.hpokpmcaqjjlaigoczmh:{db_password}@aws-0-ap-south-1.pooler.supabase.com:6543/postgres'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['UPLOAD_FOLDER'] = 'uploads'
+app.config['UPLOAD_FOLDER'] = '/tmp/uploads'
 db = SQLAlchemy(app)
 
 
