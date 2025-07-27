@@ -16,9 +16,11 @@ class UserData(db.Model):
     name = db.Column(db.String(100))
     email = db.Column(db.String(100))
     age = db.Column(db.Integer)
+    
 # Initialize DB
 with app.app_context():
     db.create_all()
+
 @app.route('/')
 def home():
     if 'username' in session:
