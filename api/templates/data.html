@@ -4,25 +4,65 @@
 {% block content %}
 <h3>Uploaded Data</h3>
 
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% for category, message in messages %}
+    <div class="alert alert-{{ category }}">{{ message }}</div>
+  {% endfor %}
+{% endwith %}
+
 {% if data %}
   <div class="table-responsive">
     <table class="table table-bordered table-striped table-hover">
       <thead class="table-dark">
         <tr>
-          <th>ID</th>
-          <th>Name</th>
-          <th>Email</th>
-          <th>Age</th>
+          <th>Phone Number</th>
+          <th>Status</th>
+          <th>Called By</th>
+          <th>Remarks</th>
+          <th>Action</th>
         </tr>
       </thead>
       <tbody>
         {% for row in data %}
-        <tr>
-          <td>{{ row.id }}</td>
-          <td>{{ row.name }}</td>
-          <td>{{ row.email }}</td>
-          <td>{{ row.age }}</td>
+        <tr {% if row.called_by %} style="background-color: #d4edda;" {% endif %}>
+          <td>{{ row.phone_number }}</td>
+          <td>{{ row.status }}</td>
+          <td>{{ row.called_by or '-' }}</td>
+          <td>{{ row.remarks or '-' }}</td>
+          <td>
+            {% if not row.called_by %}
+              <!-- Trigger Modal -->
+              <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#callModal{{ row.id }}">Call</button>
+            {% else %}
+              <span class="text-success">Done</span>
+            {% endif %}
+          </td>
         </tr>
+
+        <!-- Modal -->
+        <div class="modal fade" id="callModal{{ row.id }}" tabindex="-1" aria-labelledby="callModalLabel{{ row.id }}" aria-hidden="true">
+          <div class="modal-dialog">
+            <form method="POST" action="{{ url_for('mark_called', record_id=row.id) }}">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title" id="callModalLabel{{ row.id }}">Call {{ row.phone_number }}</h5>
+                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                  <div class="mb-3">
+                    <label for="remarks" class="form-label">Remarks</label>
+                    <textarea class="form-control" name="remarks" rows="3" required></textarea>
+                  </div>
+                </div>
+                <div class="modal-footer">
+                  <button type="submit" class="btn btn-success">Submit</button>
+                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+
         {% endfor %}
       </tbody>
     </table>

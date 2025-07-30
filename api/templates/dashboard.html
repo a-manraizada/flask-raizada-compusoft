@@ -10,7 +10,10 @@
         <h5 class="card-title">Hello {{ username }}</h5>
         <ul class="nav flex-column">
             <li class="nav-item"><a class="nav-link" href="#">Overview</a></li>
-            <li class="nav-item"><a class="nav-link" href="{{ url_for('view_data') }}">View Uploaded Data</a></li>
+            <li class="nav-item"><a class="nav-link" href="{{ url_for('view_data') }}">Data</a></li>
+            {% if session['role'] == 'admin' %}
+              <li class="nav-item"><a class="nav-link" href="{{ url_for('upload_data') }}">Upload Data</a></li>
+            {% endif %}
             <li class="nav-item"><a class="nav-link" href="{{ url_for('users') }}">Users</a></li>
             <li class="nav-item"><a class="nav-link" href="#">Settings</a></li>
             <li class="nav-item"><a class="nav-link text-danger" href="{{ url_for('logout') }}">Logout</a></li>
@@ -50,14 +53,6 @@
         </div>
       </div>
     </div>
-    <hr>
-        <h4>Upload Excel File</h4>
-        <form method="POST" action="/upload" enctype="multipart/form-data">
-        <div class="mb-3">
-            <input type="file" name="file" accept=".xlsx" class="form-control">
-        </div>
-        <button type="submit" class="btn btn-primary">Upload</button>
-        </form>
   </div>
 </div>
 {% endblock %}

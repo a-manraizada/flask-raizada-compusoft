@@ -17,11 +17,12 @@ db = SQLAlchemy(app)
 
 
 # Create a simple model
-class UserData(db.Model):
+class CallingData(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(100))
-    email = db.Column(db.String(100))
-    age = db.Column(db.Integer)
+    phone_number = db.Column(db.String(100))
+    status = db.Column(db.String(100))
+    remarks = db.Column(db.String(100))
+    called_by = db.Column(db.String(100))
 
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -109,38 +110,52 @@ def users():
     all_users = User.query.all()
     return render_template('users.html', users=all_users)
 
-@app.route('/upload', methods=['POST'])
-def upload():
-    try:
-        if 'file' not in request.files:
-            flash('No file part', 'danger')
-            return redirect(url_for('home'))
-
-        file = request.files['file']
-        if file.filename == '':
-            flash('No selected file', 'warning')
-            return redirect(url_for('home'))
-
-        if file and file.filename.endswith('.xlsx'):
-            os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
-            filepath = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
-            file.save(filepath)
-
-            df = pd.read_excel(filepath)
-            for _, row in df.iterrows():
-                user = UserData(name=row['Name'], email=row['Email'], age=int(row['Age']))
-                db.session.add(user)
-            db.session.commit()
-            flash('Data uploaded successfully!', 'success')
-
-        else:
-            flash('Invalid file type. Please upload a .xlsx file.', 'danger')
+@app.route('/upload', methods=['GET', 'POST'])
+def upload_data():
+    if 'user_id' not in session or session.get('role') != 'admin':
+        flash('Access denied. Admins only.', 'danger')
         return redirect(url_for('home'))
 
-    except Exception as e:
-        print("ERROR:", traceback.format_exc())  # Vercel logs
-        flash(f'Server error: {e}', 'danger')
-        return redirect(url_for('home'))
+    if request.method == 'POST':
+        try:
+            if 'file' not in request.files:
+                flash('No file part.', 'danger')
+                return redirect(url_for('upload_data'))
+
+            file = request.files['file']
+            if file.filename == '':
+                flash('No file selected.', 'warning')
+                return redirect(url_for('upload_data'))
+
+            if file and file.filename.endswith('.xlsx'):
+                os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+                filepath = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
+                file.save(filepath)
+
+                df = pd.read_excel(filepath)
+                for _, row in df.iterrows():
+                    entry = CallingData(
+                        phone_number=str(row['phone_number']),
+                        status="to call",
+                        called_by="",
+                        remarks=""
+                    )
+                    db.session.add(entry)
+                db.session.commit()
+
+                flash('Data uploaded successfully!', 'success')
+            else:
+                flash('Invalid file type. Please upload a .xlsx file.', 'danger')
+
+        except Exception as e:
+            import traceback
+            print("ERROR:", traceback.format_exc())
+            flash(f'Server error: {e}', 'danger')
+
+        return redirect(url_for('upload_data'))
+
+    return render_template('upload.html', username=session['user_name'])
+
     
 @app.route('/toggle_role/<int:user_id>', methods=['POST'])
 def toggle_role(user_id):
@@ -160,8 +175,24 @@ def view_data():
     if 'user_id' not in session:
         return redirect(url_for('login'))
 
-    all_data = UserData.query.all()
+    all_data = CallingData.query.all()
     return render_template('data.html', data=all_data, username=session['user_id'])
+
+@app.route('/mark_called/<int:record_id>', methods=['POST'])
+def mark_called(record_id):
+    if 'user_id' not in session:
+        flash('Login required.', 'danger')
+        return redirect(url_for('login'))
+
+    record = CallingData.query.get_or_404(record_id)
+    record.remarks = request.form['remarks']
+    record.called_by = session.get('user_name')
+    record.status = 'called'
+
+    db.session.commit()
+    flash('Call marked successfully.', 'success')
+    return redirect(url_for('view_data'))
+
 
 
 if __name__ == '__main__':
