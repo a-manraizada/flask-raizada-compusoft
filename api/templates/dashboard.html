@@ -7,7 +7,7 @@
     <!-- Sidebar -->
     <div class="card bg-light mb-3">
       <div class="card-body">
-        <h5 class="card-title">Hello, {{ username }}</h5>
+        <h5 class="card-title">Hello {{ username }}</h5>
         <ul class="nav flex-column">
             <li class="nav-item"><a class="nav-link" href="#">Overview</a></li>
             <li class="nav-item"><a class="nav-link" href="{{ url_for('view_data') }}">View Uploaded Data</a></li>
@@ -36,7 +36,7 @@
         <div class="card text-white bg-success mb-3">
           <div class="card-body">
             <h5 class="card-title">Revenue</h5>
-            <p class="card-text">$1,200 this month</p>
+            <p class="card-text">N/A this month</p>
           </div>
         </div>
       </div>

@@ -47,7 +47,7 @@ def home():
         flash('Please log in first.', 'warning')
         return redirect(url_for('login'))
 
-    return render_template('dashboard.html')
+    return render_template('dashboard.html', username=session['name'])
 
 @app.route('/about')
 def about():
@@ -85,8 +85,9 @@ def login():
         user = User.query.filter_by(username=username).first()
         if user and user.check_password(password):
             session['user_id'] = user.id
-            session['user_name'] = user.name
+            session['name'] = user.name
             session['role'] = user.role
+            session['user_name'] = user.username
             flash('Logged in successfully!', 'success')
             return redirect(url_for('home'))
         else:
@@ -156,11 +157,11 @@ def toggle_role(user_id):
 
 @app.route('/data')
 def view_data():
-    if 'username' not in session:
+    if 'user_id' not in session:
         return redirect(url_for('login'))
 
     all_data = UserData.query.all()
-    return render_template('data.html', data=all_data, username=session['username'])
+    return render_template('data.html', data=all_data, username=session['user_id'])
 
 
 if __name__ == '__main__':
