@@ -40,12 +40,6 @@ class User(db.Model):
 with app.app_context():
     db.create_all()
 
-@app.route('/')
-def home():
-    if 'username' in session:
-        return render_template('dashboard.html', username=session['username'])
-    return 'Hello, World! <a href="/login">Login</a>'
-
 @app.route('/home')
 def home():
     if 'user_id' not in session:
