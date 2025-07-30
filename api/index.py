@@ -34,7 +34,7 @@ class User(db.Model):
         self.password_hash = generate_password_hash(password)
     
     def check_password(self, password):
-        return check_password_hash(self, password)
+        return check_password_hash(self.password_hash, password)
 
 # Initialize DB
 with app.app_context():
@@ -77,10 +77,10 @@ def register():
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        email = request.form['email']
+        username = request.form['username']
         password = request.form['password']
 
-        user = User.query.filter_by(email=email).first()
+        user = User.query.filter_by(username=username).first()
         if user and user.check_password(password):
             session['user_id'] = user.id
             session['user_name'] = user.name
