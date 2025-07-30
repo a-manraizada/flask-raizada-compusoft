@@ -3,6 +3,7 @@ from flask_sqlalchemy import SQLAlchemy
 import urllib.parse
 import pandas as pd
 import os
+from werkzeug.security import generate_password_hash, check_password_hash
 
 # app = Flask(__name__)
 app = Flask(__name__, instance_path='/tmp/flask_instance')
@@ -22,6 +23,19 @@ class UserData(db.Model):
     email = db.Column(db.String(100))
     age = db.Column(db.Integer)
 
+class User(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(80), unique=True, nullable=False)
+    password_hash = db.Column(db.String(120), nullable=False)
+    email = db.Column(db.String(120), unique=True, nullable=False)
+    name = db.Column(db.String(120), nullable=False)
+
+    def set_password(self, password):
+        self.password_hash = generate_password_hash(password)
+    
+    def check_password(self, password):
+        return check_password_hash(self, password)
+
 # Initialize DB
 with app.app_context():
     db.create_all()
@@ -32,21 +46,55 @@ def home():
         return render_template('dashboard.html', username=session['username'])
     return 'Hello, World! <a href="/login">Login</a>'
 
+@app.route('/home')
+def home():
+    if 'user_id' not in session:
+        flash('Please log in first.', 'warning')
+        return redirect(url_for('login'))
+
+    return f"Welcome, {session['user_name']}!"
+
 @app.route('/about')
 def about():
     return 'About'
 
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    if request.method == 'POST':
+        name = request.form['name']
+        email = request.form['email']
+        password = request.form['password']
+
+        existing_user = User.query.filter_by(email=email).first()
+        if existing_user:
+            flash('User already exists.', 'warning')
+            return redirect(url_for('register'))
+
+        new_user = User(name=name, email=email)
+        new_user.set_password(password)
+        db.session.add(new_user)
+        db.session.commit()
+
+        flash('User registered successfully.', 'success')
+        return redirect(url_for('login'))
+
+    return render_template('register.html')
+
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        username = request.form['username']
+        email = request.form['email']
         password = request.form['password']
 
-        if username == 'admin' and password == 'password':
-            session['username'] = username
+        user = User.query.filter_by(email=email).first()
+        if user and user.check_password(password):
+            session['user_id'] = user.id
+            session['user_name'] = user.name
+            flash('Logged in successfully!', 'success')
             return redirect(url_for('home'))
         else:
-            return 'Invalid credentials. <a href="/login">Try again</a>'
+            flash('Invalid credentials.', 'danger')
+            return redirect(url_for('login'))
 
     return render_template('login.html')
 
