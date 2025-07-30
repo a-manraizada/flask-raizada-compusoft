@@ -29,6 +29,7 @@ class User(db.Model):
     password_hash = db.Column(db.String(512), nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
     name = db.Column(db.String(120), nullable=False)
+    role = db.Column(db.String(20), default='user')  # 'admin' or 'user'
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
@@ -40,13 +41,13 @@ class User(db.Model):
 with app.app_context():
     db.create_all()
 
-@app.route('/home')
+@app.route('/')
 def home():
     if 'user_id' not in session:
         flash('Please log in first.', 'warning')
         return redirect(url_for('login'))
 
-    return f"Welcome, {session['user_name']}!"
+    return render_template('dashboard.html')
 
 @app.route('/about')
 def about():
@@ -85,6 +86,7 @@ def login():
         if user and user.check_password(password):
             session['user_id'] = user.id
             session['user_name'] = user.name
+            session['role'] = user.role
             flash('Logged in successfully!', 'success')
             return redirect(url_for('home'))
         else:
@@ -95,10 +97,16 @@ def login():
 
 @app.route('/logout')
 def logout():
-    session.pop('username', None)
-    return redirect(url_for('home'))
+    session.clear()  # Clears all session data
+    flash('Logged out successfully.', 'info')  # Optional feedback
+    return redirect(url_for('login'))  # Redirect to login or home
 
 import traceback
+
+@app.route('/users')
+def users():
+    all_users = User.query.all()
+    return render_template('users.html', users=all_users)
 
 @app.route('/upload', methods=['POST'])
 def upload():
@@ -132,6 +140,19 @@ def upload():
         print("ERROR:", traceback.format_exc())  # Vercel logs
         flash(f'Server error: {e}', 'danger')
         return redirect(url_for('home'))
+    
+@app.route('/toggle_role/<int:user_id>', methods=['POST'])
+def toggle_role(user_id):
+    # Only allow admins
+    if session.get('role') != 'admin':
+        flash('Unauthorized action.', 'danger')
+        return redirect(url_for('users'))
+
+    user = User.query.get_or_404(user_id)
+    user.role = 'admin' if user.role == 'user' else 'user'
+    db.session.commit()
+    flash(f"Role for {user.username} changed to {user.role}.", 'success')
+    return redirect(url_for('users'))
 
 @app.route('/data')
 def view_data():
@@ -140,3 +161,7 @@ def view_data():
 
     all_data = UserData.query.all()
     return render_template('data.html', data=all_data, username=session['username'])
+
+
+if __name__ == '__main__':
+    app.run(debug=True)

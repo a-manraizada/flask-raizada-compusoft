@@ -1,0 +1,55 @@
+{% extends "layout.html" %}
+{% block title %}All Users{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+  <h2 class="mb-4">Registered Users</h2>
+
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% for category, message in messages %}
+      <div class="alert alert-{{ category }}">{{ message }}</div>
+    {% endfor %}
+  {% endwith %}
+
+  {% if users %}
+    <table class="table table-bordered table-hover">
+      <thead class="table-light">
+        <tr>
+          <th>ID</th>
+          <th>Username</th>
+          <th>Name</th>
+          <th>Email</th>
+          <th>Role</th>
+          {% if session['role'] == 'admin' %}
+          <th>Actions</th>
+          {% endif %}
+        </tr>
+      </thead>
+      <tbody>
+        {% for user in users %}
+          <tr>
+            <td>{{ user.id }}</td>
+            <td>{{ user.username }}</td>
+            <td>{{ user.name }}</td>
+            <td>{{ user.email }}</td>
+            <td>{{ user.role }}</td>
+            {% if session['role'] == 'admin' and user.id != session['user_id'] %}
+            <td>
+              <form method="POST" action="{{ url_for('toggle_role', user_id=user.id) }}">
+                <button type="submit" class="btn btn-sm btn-outline-secondary">
+                  Make {{ 'User' if user.role == 'admin' else 'Admin' }}
+                </button>
+              </form>
+            </td>
+            {% elif session['role'] == 'admin' %}
+            <td><em>(you)</em></td>
+            {% endif %}
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <div class="alert alert-info">No users found.</div>
+  {% endif %}
+</div>
+{% endblock %}
