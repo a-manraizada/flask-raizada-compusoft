@@ -56,6 +56,7 @@ def about():
 def register():
     if request.method == 'POST':
         name = request.form['name']
+        username = request.form['username']
         email = request.form['email']
         password = request.form['password']
 
@@ -64,7 +65,7 @@ def register():
             flash('User already exists.', 'warning')
             return redirect(url_for('register'))
 
-        new_user = User(name=name, email=email)
+        new_user = User(name=name, email=email, username=username)
         new_user.set_password(password)
         db.session.add(new_user)
         db.session.commit()
